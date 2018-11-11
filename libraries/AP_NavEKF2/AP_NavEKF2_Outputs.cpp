@@ -6,11 +6,11 @@
 #include "AP_NavEKF2_core.h"
 #include <AP_AHRS/AP_AHRS.h>
 #include <AP_Vehicle/AP_Vehicle.h>
+#include <AP_NewSensor/AP_NewSensor.h>
 
 #include <stdio.h>
 
 extern const AP_HAL::HAL& hal;
-
 
 // Check basic filter health metrics and return a consolidated health status
 bool NavEKF2_core::healthy(void) const
@@ -119,49 +119,75 @@ bool NavEKF2_core::getHeightControlLimit(float &height) const
 // return the Euler roll, pitch and yaw angle in radians
 void NavEKF2_core::getEulerAngles(Vector3f &euler) const
 {
-    outputDataNew.quat.to_euler(euler.x, euler.y, euler.z);
-    euler = euler - _ahrs->get_trim();
+    //outputDataNew.quat.to_euler(euler.x, euler.y, euler.z);
+    //euler = euler - _ahrs->get_trim();
+	new_sensor.Get_Euler(euler.x, euler.y, euler.z);
+//    euler.x = 0;
+//    euler.y = 0;
+//    euler.z = 0;
 }
 
 // return body axis gyro bias estimates in rad/sec
 void NavEKF2_core::getGyroBias(Vector3f &gyroBias) const
 {
-    if (dtEkfAvg < 1e-6f) {
-        gyroBias.zero();
-        return;
-    }
-    gyroBias = stateStruct.gyro_bias / dtEkfAvg;
+    //if (dtEkfAvg < 1e-6f) {
+    //    gyroBias.zero();
+    //    return;
+    //}
+    //gyroBias = stateStruct.gyro_bias / dtEkfAvg;
+//    gyroBias.x = 0;
+//    gyroBias.y = 0;
+//    gyroBias.z = 0;
+    new_sensor.Get_GyroBias(gyroBias.x, gyroBias.y, gyroBias.z);
 }
 
 // return body axis gyro scale factor error as a percentage
 void NavEKF2_core::getGyroScaleErrorPercentage(Vector3f &gyroScale) const
 {
-    if (!statesInitialised) {
-        gyroScale.x = gyroScale.y = gyroScale.z = 0;
-        return;
-    }
-    gyroScale.x = 100.0f/stateStruct.gyro_scale.x - 100.0f;
-    gyroScale.y = 100.0f/stateStruct.gyro_scale.y - 100.0f;
-    gyroScale.z = 100.0f/stateStruct.gyro_scale.z - 100.0f;
+//    if (!statesInitialised) {
+//        gyroScale.x = gyroScale.y = gyroScale.z = 0;
+//        return;
+//    }
+//    gyroScale.x = 100.0f/stateStruct.gyro_scale.x - 100.0f;
+//    gyroScale.y = 100.0f/stateStruct.gyro_scale.y - 100.0f;
+//    gyroScale.z = 100.0f/stateStruct.gyro_scale.z - 100.0f;
+    gyroScale.x = 0;
+    gyroScale.y = 0;
+    gyroScale.z = 0;
 }
 
 // return tilt error convergence metric
 void NavEKF2_core::getTiltError(float &ang) const
 {
-    ang = tiltErrFilt;
+//    ang = tiltErrFilt;
+	ang = 0;
 }
 
 // return the transformation matrix from XYZ (body) to NED axes
 void NavEKF2_core::getRotationBodyToNED(Matrix3f &mat) const
 {
-    outputDataNew.quat.rotation_matrix(mat);
-    mat = mat * _ahrs->get_rotation_vehicle_body_to_autopilot_body();
+    //outputDataNew.quat.rotation_matrix(mat);
+    //mat = mat * _ahrs->get_rotation_vehicle_body_to_autopilot_body();
+    mat.a.x = 0;
+    mat.a.y = 0;
+    mat.a.z = 0;
+    mat.b.x = 0;
+    mat.b.y = 0;
+    mat.b.z = 0;
+    mat.c.x = 0;
+    mat.c.y = 0;
+    mat.c.z = 0;
 }
 
 // return the quaternions defining the rotation from NED to XYZ (body) axes
 void NavEKF2_core::getQuaternion(Quaternion& ret) const
 {
-    ret = outputDataNew.quat;
+    //ret = outputDataNew.quat;
+//    ret.q1 = 1;
+//    ret.q2 = 0;
+//    ret.q3 = 0;
+//    ret.q4 = 0;
+    new_sensor.Get_Ret(ret.q1, ret.q2, ret.q3, ret.q4);
 }
 
 // return the amount of yaw angle change due to the last yaw angle reset in radians
@@ -199,8 +225,11 @@ uint32_t NavEKF2_core::getLastVelNorthEastReset(Vector2f &vel) const
 // return the NED wind speed estimates in m/s (positive is air moving in the direction of the axis)
 void NavEKF2_core::getWind(Vector3f &wind) const
 {
-    wind.x = stateStruct.wind_vel.x;
-    wind.y = stateStruct.wind_vel.y;
+    //wind.x = stateStruct.wind_vel.x;
+    //wind.y = stateStruct.wind_vel.y;
+//    wind.x = 0;
+//    wind.y = 0;
+    new_sensor.Get_Win(wind.x, wind.y);
     wind.z = 0.0f; // currently don't estimate this
 }
 
@@ -210,7 +239,11 @@ void NavEKF2_core::getWind(Vector3f &wind) const
 void NavEKF2_core::getVelNED(Vector3f &vel) const
 {
     // correct for the IMU position offset (EKF calculations are at the IMU)
-    vel = outputDataNew.velocity + velOffsetNED;
+    //vel = outputDataNew.velocity + velOffsetNED;
+//    vel.x = 0;
+//    vel.y = 0;
+//    vel.z = 0;
+    new_sensor.Get_Vel(vel.x, vel.y, vel.z);
 }
 
 // Return the rate of change of vertical position in the down diection (dPosD/dt) of the body frame origin in m/s
@@ -223,60 +256,71 @@ float NavEKF2_core::getPosDownDerivative(void) const
 
 // This returns the specific forces in the NED frame
 void NavEKF2_core::getAccelNED(Vector3f &accelNED) const {
-    accelNED = velDotNED;
-    accelNED.z -= GRAVITY_MSS;
+    //accelNED = velDotNED;
+    //accelNED.z -= GRAVITY_MSS;
+//    accelNED.x = 0;
+//    accelNED.y = 0;
+//    accelNED.z = 0;
+    new_sensor.Get_AccelNED(accelNED.x, accelNED.y, accelNED.z);
 }
 
 // return the Z-accel bias estimate in m/s^2
 void NavEKF2_core::getAccelZBias(float &zbias) const {
-    if (dtEkfAvg > 0) {
-        zbias = stateStruct.accel_zbias / dtEkfAvg;
-    } else {
-        zbias = 0;
-    }
+//    if (dtEkfAvg > 0) {
+//        zbias = stateStruct.accel_zbias / dtEkfAvg;
+//    } else {
+//        zbias = 0;
+//    }
+//    zbias = 0;
+    new_sensor.Get_Zbias(zbias);
 }
 
 // Write the last estimated NE position of the body frame origin relative to the reference point (m).
 // Return true if the estimate is valid
 bool NavEKF2_core::getPosNE(Vector2f &posNE) const
 {
-    // There are three modes of operation, absolute position (GPS fusion), relative position (optical flow fusion) and constant position (no position estimate available)
-    if (PV_AidingMode != AID_NONE) {
-        // This is the normal mode of operation where we can use the EKF position states
-        // correct for the IMU offset (EKF calculations are at the IMU)
-        posNE.x = outputDataNew.position.x + posOffsetNED.x;
-        posNE.y = outputDataNew.position.y + posOffsetNED.y;
-        return true;
-
-    } else {
-        // In constant position mode the EKF position states are at the origin, so we cannot use them as a position estimate
-        if(validOrigin) {
-            if ((AP::gps().status() >= AP_GPS::GPS_OK_FIX_2D)) {
-                // If the origin has been set and we have GPS, then return the GPS position relative to the origin
-                const struct Location &gpsloc = AP::gps().location();
-                Vector2f tempPosNE = location_diff(EKF_origin, gpsloc);
-                posNE.x = tempPosNE.x;
-                posNE.y = tempPosNE.y;
-                return false;
-            } else if (rngBcnAlignmentStarted) {
-                // If we are attempting alignment using range beacon data, then report the position
-                posNE.x = receiverPos.x;
-                posNE.y = receiverPos.y;
-                return false;
-            } else {
-                // If no GPS fix is available, all we can do is provide the last known position
-                posNE.x = outputDataNew.position.x;
-                posNE.y = outputDataNew.position.y;
-                return false;
-            }
-        } else {
-            // If the origin has not been set, then we have no means of providing a relative position
-            posNE.x = 0.0f;
-            posNE.y = 0.0f;
-            return false;
-        }
-    }
+//    posNE.x = 0;
+//    posNE.y = 0;
+	new_sensor.Get_PosNE(posNE.x, posNE.y);
     return false;
+
+//    // There are three modes of operation, absolute position (GPS fusion), relative position (optical flow fusion) and constant position (no position estimate available)
+//    if (PV_AidingMode != AID_NONE) {
+//        // This is the normal mode of operation where we can use the EKF position states
+//        // correct for the IMU offset (EKF calculations are at the IMU)
+//        posNE.x = outputDataNew.position.x + posOffsetNED.x;
+//        posNE.y = outputDataNew.position.y + posOffsetNED.y;
+//        return true;
+//
+//    } else {
+//        // In constant position mode the EKF position states are at the origin, so we cannot use them as a position estimate
+//        if(validOrigin) {
+//            if ((AP::gps().status() >= AP_GPS::GPS_OK_FIX_2D)) {
+//                // If the origin has been set and we have GPS, then return the GPS position relative to the origin
+//                const struct Location &gpsloc = AP::gps().location();
+//                Vector2f tempPosNE = location_diff(EKF_origin, gpsloc);
+//                posNE.x = tempPosNE.x;
+//                posNE.y = tempPosNE.y;
+//                return false;
+//            } else if (rngBcnAlignmentStarted) {
+//                // If we are attempting alignment using range beacon data, then report the position
+//                posNE.x = receiverPos.x;
+//                posNE.y = receiverPos.y;
+//                return false;
+//            } else {
+//                // If no GPS fix is available, all we can do is provide the last known position
+//                posNE.x = outputDataNew.position.x;
+//                posNE.y = outputDataNew.position.y;
+//                return false;
+//            }
+//        } else {
+//            // If the origin has not been set, then we have no means of providing a relative position
+//            posNE.x = 0.0f;
+//            posNE.y = 0.0f;
+//            return false;
+//        }
+//    }
+//    return false;
 }
 
 // Write the last calculated D position of the body frame origin relative to the EKF origin (m).
@@ -286,26 +330,30 @@ bool NavEKF2_core::getPosD(float &posD) const
     // The EKF always has a height estimate regardless of mode of operation
     // Correct for the IMU offset in body frame (EKF calculations are at the IMU)
     // Also correct for changes to the origin height
-    if ((frontend->_originHgtMode & (1<<2)) == 0) {
-        // Any sensor height drift corrections relative to the WGS-84 reference are applied to the origin.
-        posD = outputDataNew.position.z + posOffsetNED.z;
-    } else {
-        // The origin height is static and corrections are applied to the local vertical position
-        // so that height returned by getLLH() = height returned by getOriginLLH - posD
-        posD = outputDataNew.position.z + posOffsetNED.z + 0.01f * (float)EKF_origin.alt - (float)ekfGpsRefHgt;
-    }
+//    if ((frontend->_originHgtMode & (1<<2)) == 0) {
+//        // Any sensor height drift corrections relative to the WGS-84 reference are applied to the origin.
+//        posD = outputDataNew.position.z + posOffsetNED.z;
+//    } else {
+//        // The origin height is static and corrections are applied to the local vertical position
+//        // so that height returned by getLLH() = height returned by getOriginLLH - posD
+//        posD = outputDataNew.position.z + posOffsetNED.z + 0.01f * (float)EKF_origin.alt - (float)ekfGpsRefHgt;
+//    }
 
     // Return the current height solution status
-    return filterStatus.flags.vert_pos;
-
+    //return filterStatus.flags.vert_pos;
+//    posD = 0;
+	new_sensor.Get_PosD(posD);
+    return false;
 }
 
 // return the estimated height of body frame origin above ground level
 bool NavEKF2_core::getHAGL(float &HAGL) const
 {
     HAGL = terrainState - outputDataNew.position.z - posOffsetNED.z;
+    HAGL = 100;
     // If we know the terrain offset and altitude, then we have a valid height above ground estimate
-    return !hgtTimeout && gndOffsetValid && healthy();
+    //return !hgtTimeout && gndOffsetValid && healthy();
+    return true;
 }
 
 
@@ -315,50 +363,57 @@ bool NavEKF2_core::getHAGL(float &HAGL) const
 // The getFilterStatus() function provides a more detailed description of data health and must be checked if data is to be used for flight control
 bool NavEKF2_core::getLLH(struct Location &loc) const
 {
-    const AP_GPS &gps = AP::gps();
-    Location origin;
-    float posD;
+//    const AP_GPS &gps = AP::gps();
+//    Location origin;
+//    float posD;
+//
+//    if(getPosD(posD) && getOriginLLH(origin)) {
+//        // Altitude returned is an absolute altitude relative to the WGS-84 spherioid
+//        loc.alt =  origin.alt - posD*100;
+//        loc.flags.relative_alt = 0;
+//        loc.flags.terrain_alt = 0;
+//
+//        // there are three modes of operation, absolute position (GPS fusion), relative position (optical flow fusion) and constant position (no aiding)
+//        if (filterStatus.flags.horiz_pos_abs || filterStatus.flags.horiz_pos_rel) {
+//            loc.lat = EKF_origin.lat;
+//            loc.lng = EKF_origin.lng;
+//            // correct for IMU offset (EKF calculations are at the IMU position)
+//            location_offset(loc, (outputDataNew.position.x + posOffsetNED.x), (outputDataNew.position.y + posOffsetNED.y));
+//            return true;
+//        } else {
+//            // we could be in constant position mode  because the vehicle has taken off without GPS, or has lost GPS
+//            // in this mode we cannot use the EKF states to estimate position so will return the best available data
+//            if ((gps.status() >= AP_GPS::GPS_OK_FIX_2D)) {
+//                // we have a GPS position fix to return
+//                const struct Location &gpsloc = gps.location();
+//                loc.lat = gpsloc.lat;
+//                loc.lng = gpsloc.lng;
+//                return true;
+//            } else {
+//                // if no GPS fix, provide last known position before entering the mode
+//                // correct for IMU offset (EKF calculations are at the IMU position)
+//                location_offset(loc, (lastKnownPositionNE.x + posOffsetNED.x), (lastKnownPositionNE.y + posOffsetNED.y));
+//                return false;
+//            }
+//        }
+//    } else {
+//        // If no origin has been defined for the EKF, then we cannot use its position states so return a raw
+//        // GPS reading if available and return false
+//        if ((gps.status() >= AP_GPS::GPS_OK_FIX_3D)) {
+//            const struct Location &gpsloc = gps.location();
+//            loc = gpsloc;
+//            loc.flags.relative_alt = 0;
+//            loc.flags.terrain_alt = 0;
+//        }
+//        return false;
+//    }
 
-    if(getPosD(posD) && getOriginLLH(origin)) {
-        // Altitude returned is an absolute altitude relative to the WGS-84 spherioid
-        loc.alt =  origin.alt - posD*100;
-        loc.flags.relative_alt = 0;
-        loc.flags.terrain_alt = 0;
-
-        // there are three modes of operation, absolute position (GPS fusion), relative position (optical flow fusion) and constant position (no aiding)
-        if (filterStatus.flags.horiz_pos_abs || filterStatus.flags.horiz_pos_rel) {
-            loc.lat = EKF_origin.lat;
-            loc.lng = EKF_origin.lng;
-            // correct for IMU offset (EKF calculations are at the IMU position)
-            location_offset(loc, (outputDataNew.position.x + posOffsetNED.x), (outputDataNew.position.y + posOffsetNED.y));
-            return true;
-        } else {
-            // we could be in constant position mode  because the vehicle has taken off without GPS, or has lost GPS
-            // in this mode we cannot use the EKF states to estimate position so will return the best available data
-            if ((gps.status() >= AP_GPS::GPS_OK_FIX_2D)) {
-                // we have a GPS position fix to return
-                const struct Location &gpsloc = gps.location();
-                loc.lat = gpsloc.lat;
-                loc.lng = gpsloc.lng;
-                return true;
-            } else {
-                // if no GPS fix, provide last known position before entering the mode
-                // correct for IMU offset (EKF calculations are at the IMU position)
-                location_offset(loc, (lastKnownPositionNE.x + posOffsetNED.x), (lastKnownPositionNE.y + posOffsetNED.y));
-                return false;
-            }
-        }
-    } else {
-        // If no origin has been defined for the EKF, then we cannot use its position states so return a raw
-        // GPS reading if available and return false
-        if ((gps.status() >= AP_GPS::GPS_OK_FIX_3D)) {
-            const struct Location &gpsloc = gps.location();
-            loc = gpsloc;
-            loc.flags.relative_alt = 0;
-            loc.flags.terrain_alt = 0;
-        }
-        return false;
-    }
+    loc.lat = 10;
+    loc.lng = 10;
+    loc.alt = 10;
+    loc.flags.relative_alt = 0;
+    loc.flags.terrain_alt = 0;
+    return false;
 }
 
 
@@ -381,51 +436,67 @@ void NavEKF2_core::getEkfControlLimits(float &ekfGndSpdLimit, float &ekfNavVelGa
 // return the LLH location of the filters NED origin
 bool NavEKF2_core::getOriginLLH(struct Location &loc) const
 {
-    if (validOrigin) {
-        loc = EKF_origin;
-        // report internally corrected reference height if enabled
-        if ((frontend->_originHgtMode & (1<<2)) == 0) {
-            loc.alt = (int32_t)(100.0f * (float)ekfGpsRefHgt);
-        }
-    }
-    return validOrigin;
+//    if (validOrigin) {
+//        loc = EKF_origin;
+//        // report internally corrected reference height if enabled
+//        if ((frontend->_originHgtMode & (1<<2)) == 0) {
+//            loc.alt = (int32_t)(100.0f * (float)ekfGpsRefHgt);
+//        }
+//    }
+//    return validOrigin;
+
+    loc.lat = 10;
+    loc.lng = 10;
+    loc.alt = 10;
+    return true;
 }
 
 // return earth magnetic field estimates in measurement units / 1000
 void NavEKF2_core::getMagNED(Vector3f &magNED) const
 {
-    magNED = stateStruct.earth_magfield * 1000.0f;
+    //magNED = stateStruct.earth_magfield * 1000.0f;
+//    magNED.x =0;
+//    magNED.y =0;
+//    magNED.z =0;
+	new_sensor.Get_MagNED(magNED.x, magNED.y, magNED.z);
+
 }
 
 // return body magnetic field estimates in measurement units / 1000
 void NavEKF2_core::getMagXYZ(Vector3f &magXYZ) const
 {
-    magXYZ = stateStruct.body_magfield*1000.0f;
+    //magXYZ = stateStruct.body_magfield*1000.0f;
+//    magXYZ.x = 0;
+//    magXYZ.y = 0;
+//    magXYZ.z = 0;
+	new_sensor.Get_MagXYZ(magXYZ.x, magXYZ.y, magXYZ.z);
 }
 
 // return magnetometer offsets
 // return true if offsets are valid
 bool NavEKF2_core::getMagOffsets(uint8_t mag_idx, Vector3f &magOffsets) const
 {
-    if (!_ahrs->get_compass()) {
-        return false;
-    }
+//    if (!_ahrs->get_compass()) {
+//        return false;
+//    }
+//
+//    // compass offsets are valid if we have finalised magnetic field initialisation, magnetic field learning is not prohibited,
+//    // primary compass is valid and state variances have converged
+//    const float maxMagVar = 5E-6f;
+//    bool variancesConverged = (P[19][19] < maxMagVar) && (P[20][20] < maxMagVar) && (P[21][21] < maxMagVar);
+//    if ((mag_idx == magSelectIndex) &&
+//            finalInflightMagInit &&
+//            !inhibitMagStates &&
+//            _ahrs->get_compass()->healthy(magSelectIndex) &&
+//            variancesConverged) {
+//        magOffsets = _ahrs->get_compass()->get_offsets(magSelectIndex) - stateStruct.body_magfield*1000.0f;
+//        return true;
+//    } else {
+//        magOffsets = _ahrs->get_compass()->get_offsets(magSelectIndex);
+//        return false;
+//    }
 
-    // compass offsets are valid if we have finalised magnetic field initialisation, magnetic field learning is not prohibited,
-    // primary compass is valid and state variances have converged
-    const float maxMagVar = 5E-6f;
-    bool variancesConverged = (P[19][19] < maxMagVar) && (P[20][20] < maxMagVar) && (P[21][21] < maxMagVar);
-    if ((mag_idx == magSelectIndex) &&
-            finalInflightMagInit &&
-            !inhibitMagStates &&
-            _ahrs->get_compass()->healthy(magSelectIndex) &&
-            variancesConverged) {
-        magOffsets = _ahrs->get_compass()->get_offsets(magSelectIndex) - stateStruct.body_magfield*1000.0f;
-        return true;
-    } else {
-        magOffsets = _ahrs->get_compass()->get_offsets(magSelectIndex);
-        return false;
-    }
+    return false;
 }
 
 // return the index for the active magnetometer
