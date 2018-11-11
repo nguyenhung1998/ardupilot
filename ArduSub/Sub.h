@@ -76,6 +76,7 @@
 #include <AP_JSButton/AP_JSButton.h>   // Joystick/gamepad button function assignment
 #include <AP_LeakDetector/AP_LeakDetector.h> // Leak detector
 #include <AP_TemperatureSensor/TSYS01.h>
+#include <AP_NewSensor/AP_NewSensor.h>
 
 // Local modules
 #include "defines.h"
@@ -191,6 +192,7 @@ private:
     NavEKF2 EKF2{&ahrs, rangefinder};
     NavEKF3 EKF3{&ahrs, rangefinder};
     AP_AHRS_NavEKF ahrs{EKF2, EKF3, AP_AHRS_NavEKF::FLAG_ALWAYS_USE_EKF};
+    //AP_AHRS_NavEKF ahrs{EKF2, EKF3, AP_AHRS_NavEKF::FLAG_NONE};
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     SITL::SITL sitl;
@@ -449,6 +451,8 @@ private:
     static const AP_Scheduler::Task scheduler_tasks[];
     static const AP_Param::Info var_info[];
     static const struct LogStructure log_structure[];
+
+    void Read_Data();
 
     void init_compass_location();
     void compass_cal_update(void);
