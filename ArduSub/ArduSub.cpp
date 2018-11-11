@@ -59,6 +59,9 @@ const AP_Scheduler::Task Sub::scheduler_tasks[] = {
     SCHED_TASK(compass_cal_update,   100,    100),
     SCHED_TASK(accel_cal_update,      10,    100),
     SCHED_TASK(terrain_update,        10,    100),
+
+//	SCHED_TASK(Read_Data, 1000, 100),
+
 #if GRIPPER_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Gripper,          &sub.g2.gripper,       update,              10,  75),
 #endif
@@ -88,6 +91,8 @@ void Sub::setup()
 
     init_ardupilot();
 
+    hal.uartB->begin(115200);
+
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
 }
@@ -98,6 +103,10 @@ void Sub::loop()
     G_Dt = scheduler.get_loop_period_s();
 }
 
+void Sub::Read_Data()
+{
+	new_sensor.Read_Data();
+}
 
 // Main loop - 400hz
 void Sub::fast_loop()
@@ -322,6 +331,9 @@ void Sub::read_AHRS()
     // Perform IMU calculations and get attitude info
     //-----------------------------------------------
     // <true> tells AHRS to skip INS update as we have already done it in fast_loop()
+//	char a[200]="";
+//	Vir_Data(a);
+//	new_sensor.Get_DataFrame(a);
     ahrs.update(true);
     ahrs_view.update(true);
 }
