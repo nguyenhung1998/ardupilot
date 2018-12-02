@@ -56,7 +56,7 @@ void loop(void)
 		//char inChar = (char)hal.uartB->read();
 		if (gps.location.isValid())
 		{
-			hal.uartA->printf("%4.6f, %4.6f " , gps.location.lat(), gps.location.lng());
+			hal.uartA->printf("%4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
 		}
 	}
 }
