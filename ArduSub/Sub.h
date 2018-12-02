@@ -77,6 +77,7 @@
 #include <AP_LeakDetector/AP_LeakDetector.h> // Leak detector
 #include <AP_TemperatureSensor/TSYS01.h>
 #include <AP_NewSensor/AP_NewSensor.h>
+#include <TinyGPS/TinyGPS++.h>
 
 // Local modules
 #include "defines.h"
@@ -213,6 +214,9 @@ private:
     uint32_t ekfYawReset_ms = 0;
 
     AP_SerialManager serial_manager;
+
+    // The TinyGPS++ object
+    TinyGPSPlus tinygps;
 
     // GCS selection
     GCS_Sub _gcs; // avoid using this; use gcs()
