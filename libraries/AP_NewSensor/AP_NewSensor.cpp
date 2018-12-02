@@ -6,7 +6,7 @@ New_Sensor new_sensor;
 New_Sensor::New_Sensor()
 {
 	uint8_t i;
-	for(i=0; i<28; i++)
+	for(i=0; i<32; i++)
 		this->sensor[i] = 0;
 }
 
@@ -35,7 +35,7 @@ void New_Sensor::Get_DataFrame(char *str)
 	int8_t j = 0;
 
 	char tmp_str[10];
-	float tmp_sensor[28];
+	float tmp_sensor[30];
 
 	for(i=0; i<len; i++)
 	{
@@ -51,7 +51,7 @@ void New_Sensor::Get_DataFrame(char *str)
 		String_nCopy(str, tmp_str, start, len);
 		tmp_sensor[j++] = atof(tmp_str);
 	}
-	if(j<28)
+	if(j<30)
 		return;
 	else
 	{
@@ -167,20 +167,33 @@ void New_Sensor::Get_GPS_stuff(uint16_t &time_week, uint32_t &time_week_ms, uint
 
 int32_t New_Sensor::Get_GPS_lat()
 {
-	int32_t lat = 209727828L;
-	return lat;
+	//int32_t lat = 209727828L;
+//	return this->sensor[28];
+	return this->lat;
 }
 
 int32_t New_Sensor::Get_GPS_lng()
 {
-	int32_t lng = 1057774111L;
-	return lng;
+	//int32_t lng = 1057774111L;
+//	return this->sensor[29];
+	return this->lng;
 }
 
 int32_t New_Sensor::Get_GPS_alt()
 {
-	int32_t alt = 58400;
-	return alt;
+	//int32_t alt = 58400;
+//	return this->sensor[30];
+	return this->alt;
+}
+
+void New_Sensor::Read_GPS_Data(int32_t new_lat, int32_t new_lng, int32_t new_alt)
+{
+//	this->sensor[28] = lat;
+//	this->sensor[29] = lng;
+//	this->sensor[30] = alt;
+	this->lat = new_lat;
+	this->lng = new_lng;
+	this->alt = new_alt;
 }
 
 void New_Sensor::Get_GPS_velocity(float &x, float &y, float &z)
@@ -220,17 +233,25 @@ void New_Sensor::Read_Data()
 		while(hal.uartB->available())
 		{
 			char inChar = (char)hal.uartB->read();
+			if (inChar == '\n')
+			{
+				break;
+			}
 			message[len_message] = inChar;
 			len_message++;
+			if (len_message > 200)
+			{
+				break;
+			}
+
 		}
 
-//		if(len_message > 0)
-//		{
-//			hal.uartA->printf("%s\n", message);
-//			hal.uartA->printf("Last shit:%c %d\n", message[len_message-1], message[len_message-1]);
-//		}
+		if (len_message > 200)
+		{
+			break;
+		}
 
-		if(message[len_message-1]  == '\n')
+		if(len_message > 0)
 		{
 			new_sensor.Get_DataFrame(message);
 			recieved = false;

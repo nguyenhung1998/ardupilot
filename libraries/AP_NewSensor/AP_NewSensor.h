@@ -40,6 +40,7 @@ class New_Sensor{
 		void Get_GPS_accuracy(float &speed_accuracy, float &horizontal_accuracy, float &vertical_accuracy);
 		void Get_GPS_dilution(uint16_t &hdop, uint16_t &vdop);
 		void Read_Data();
+		void Read_GPS_Data(int32_t lat, int32_t lng, int32_t alt);
 
 		/*
 			Example Get
@@ -60,7 +61,10 @@ class New_Sensor{
 		float win_x, win_y;							-> sensor[25:26]
 		float zbias;								-> sensor[27]
 		*/
-		float sensor[28];
+		double sensor[32];
+		int32_t lat;
+		int32_t lng;
+		int32_t alt;
 
 };
 
