@@ -60,7 +60,7 @@ const AP_Scheduler::Task Sub::scheduler_tasks[] = {
     SCHED_TASK(accel_cal_update,      10,    100),
     SCHED_TASK(terrain_update,        10,    100),
 
-//	SCHED_TASK(Read_Data, 1000, 100),
+	SCHED_TASK(Read_Data, 400, 200),
 
 #if GRIPPER_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Gripper,          &sub.g2.gripper,       update,              10,  75),
@@ -105,7 +105,19 @@ void Sub::loop()
 
 void Sub::Read_Data()
 {
-	new_sensor.Read_Data();
+	while(hal.uartB->available())
+	{
+		if (tinygps.encode((char)hal.uartB->read()))
+		//char inChar = (char)hal.uartB->read();
+		if (tinygps.location.isValid())
+		{
+			new_sensor.Read_GPS_Data(tinygps.location.rawLat().billionths, tinygps.location.rawLng().billionths, tinygps.altitude.value());
+			//hal.uartA->printf("%4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
+			gcs().send_text(MAV_SEVERITY_INFO, "%4.6f, %4.6f \n" , tinygps.location.lat(), tinygps.location.lng());
+			//gcs().send_text(MAV_SEVERITY_INFO, tinygps.location.lng());
+		}
+	}
+
 }
 
 // Main loop - 400hz
