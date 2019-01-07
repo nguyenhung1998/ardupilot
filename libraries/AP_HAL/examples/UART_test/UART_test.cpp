@@ -19,6 +19,38 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 
 // The TinyGPS++ object
 TinyGPSPlus gps;
+
+//GPVTG
+TinyGPSCustom GPVTG_magnetic_course(gps, "GPVTG", 3);  // deg
+TinyGPSCustom GPVTG_speed(gps, "GPVTG", 7);  // km/h
+
+//PHROT
+TinyGPSCustom PHROT_roll(gps, "PHROT", 1);  // deg/s
+TinyGPSCustom PHROT_pitch(gps, "PHROT", 2);  // deg/s
+TinyGPSCustom PHROT_heading(gps, "PHROT", 3);  // deg/s
+
+//PHSPD
+TinyGPSCustom PHSPD_surge(gps, "PHSPD", 1);  // m/s
+TinyGPSCustom PHSPD_sway(gps, "PHSPD", 2);  // m/s
+TinyGPSCustom PHSPD_heave(gps, "PHSPD", 3);  // m/s
+
+//PHTRH
+TinyGPSCustom PHTRH_pitch(gps, "PHTRH", 1);  // deg
+TinyGPSCustom PHTRH_roll(gps, "PHTRH", 3);  // deg
+
+//PHTRO
+TinyGPSCustom PHTRO_pitch(gps, "PHTRO", 1);  // deg
+TinyGPSCustom PHTRO_roll(gps, "PHTRO", 3);  // deg
+
+//HEHDT
+TinyGPSCustom HEHDT_heading(gps, "HEHDT", 1);  // deg
+
+//HEROT
+TinyGPSCustom HEROT_heading(gps, "HEROT", 1);  // deg/mn
+
+//HETHS
+TinyGPSCustom HETHS_heading(gps, "HETHS", 1);  // deg
+
 /*
   setup one UART at 57600
  */
