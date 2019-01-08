@@ -86,9 +86,33 @@ void loop(void)
 	{
 		if (gps.encode((char)hal.uartB->read()))
 		//char inChar = (char)hal.uartB->read();
-		if (gps.location.isValid())
+		if (gps.location.isUpdated())
 		{
-			hal.uartA->printf("%4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
+			hal.uartA->printf("Location: %4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
+		}
+		if (PHROT_roll.isUpdated())
+		{
+			hal.uartA->printf("PHROT: %s \n", PHROT_roll.value());
+		}
+		if (PHSPD_surge.isUpdated())
+		{
+			hal.uartA->printf("PHSPD: %s \n", PHSPD_surge.value());
+		}
+		if (PHTRH_pitch.isUpdated())
+		{
+			hal.uartA->printf("PHTRH: %s \n", PHTRH_pitch.value());
+		}
+		if (PHTRH_pitch.isUpdated())
+		{
+			hal.uartA->printf("PHTRH: %s \n", PHTRH_pitch.value());
+		}
+		if (PHTRO_pitch.isUpdated())
+		{
+			hal.uartA->printf("PHTRO_pitch: %s \n", PHTRO_pitch.value());
+		}
+		if (HEHDT_heading.isUpdated())
+		{
+			hal.uartA->printf("HEHDT: %s \n", HEHDT_heading.value());
 		}
 	}
 }
