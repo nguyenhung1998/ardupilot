@@ -17,39 +17,38 @@ void loop();
 
 const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 
-// The TinyGPS++ object
-TinyGPSPlus gps;
+TinyGPSPlus tinygps;
 
 //GPVTG
-TinyGPSCustom GPVTG_magnetic_course(gps, "GPVTG", 3);  // deg
-TinyGPSCustom GPVTG_speed(gps, "GPVTG", 7);  // km/h
+TinyGPSCustom GPVTG_magnetic_course(tinygps, "GPVTG", 3);  // deg
+TinyGPSCustom GPVTG_speed(tinygps, "GPVTG", 7);  // km/h
 
 //PHROT
-TinyGPSCustom PHROT_roll(gps, "PHROT", 1);  // deg/s
-TinyGPSCustom PHROT_pitch(gps, "PHROT", 2);  // deg/s
-TinyGPSCustom PHROT_heading(gps, "PHROT", 3);  // deg/s
+TinyGPSCustom PHROT_roll(tinygps, "PHROT", 1);  // deg/s
+TinyGPSCustom PHROT_pitch(tinygps, "PHROT", 2);  // deg/s
+TinyGPSCustom PHROT_heading(tinygps, "PHROT", 3);  // deg/s
 
 //PHSPD
-TinyGPSCustom PHSPD_surge(gps, "PHSPD", 1);  // m/s
-TinyGPSCustom PHSPD_sway(gps, "PHSPD", 2);  // m/s
-TinyGPSCustom PHSPD_heave(gps, "PHSPD", 3);  // m/s
+TinyGPSCustom PHSPD_surge(tinygps, "PHSPD", 1);  // m/s
+TinyGPSCustom PHSPD_sway(tinygps, "PHSPD", 2);  // m/s
+TinyGPSCustom PHSPD_heave(tinygps, "PHSPD", 3);  // m/s
 
 //PHTRH
-TinyGPSCustom PHTRH_pitch(gps, "PHTRH", 1);  // deg
-TinyGPSCustom PHTRH_roll(gps, "PHTRH", 3);  // deg
+TinyGPSCustom PHTRH_pitch(tinygps, "PHTRH", 1);  // deg
+TinyGPSCustom PHTRH_roll(tinygps, "PHTRH", 3);  // deg
 
 //PHTRO
-TinyGPSCustom PHTRO_pitch(gps, "PHTRO", 1);  // deg
-TinyGPSCustom PHTRO_roll(gps, "PHTRO", 3);  // deg
+TinyGPSCustom PHTRO_pitch(tinygps, "PHTRO", 1);  // deg
+TinyGPSCustom PHTRO_roll(tinygps, "PHTRO", 3);  // deg
 
 //HEHDT
-TinyGPSCustom HEHDT_heading(gps, "HEHDT", 1);  // deg
+TinyGPSCustom HEHDT_heading(tinygps, "HEHDT", 1);  // deg
 
 //HEROT
-TinyGPSCustom HEROT_heading(gps, "HEROT", 1);  // deg/mn
+TinyGPSCustom HEROT_heading(tinygps, "HEROT", 1);  // deg/mn
 
 //HETHS
-TinyGPSCustom HETHS_heading(gps, "HETHS", 1);  // deg
+TinyGPSCustom HETHS_heading(tinygps, "HETHS", 1);  // deg
 
 /*
   setup one UART at 57600
@@ -84,11 +83,11 @@ void loop(void)
 {
 	while(hal.uartB->available())
 	{
-		if (gps.encode((char)hal.uartB->read()))
+		if (tinygps.encode((char)hal.uartB->read()))
 		//char inChar = (char)hal.uartB->read();
-		if (gps.location.isUpdated())
+		if (tinygps.location.isUpdated())
 		{
-			hal.uartA->printf("Location: %4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
+			hal.uartA->printf("Location: %4.6f, %4.6f \n" , tinygps.location.lat(), tinygps.location.lng());
 		}
 		if (PHROT_roll.isUpdated())
 		{
