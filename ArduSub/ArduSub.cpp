@@ -142,9 +142,9 @@ void Sub::Read_Data()
 		//char inChar = (char)hal.uartB->read();
 		if (tinygps.location.isValid())
 		{
-			new_sensor.Read_GPS_Data(tinygps.location.lat() * 1.0e7f, tinygps.location.lng() * 1.0e7f, tinygps.altitude.value());
+			new_sensor.Read_GPS_Data(tinygps.location.lat() * 1.0e7f, tinygps.location.lng() * 1.0e7f, tinygps.altitude.meters());
 			//hal.uartA->printf("%4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
-			gcs().send_text(MAV_SEVERITY_INFO, "%4.6f, %4.6f \n" , tinygps.location.lat(), tinygps.location.lng());
+			gcs().send_text(MAV_SEVERITY_INFO, "%4.6f, %4.6f, %4.6f \n" , tinygps.location.lat(), tinygps.location.lng(), tinygps.altitude.meters());
 			//gcs().send_text(MAV_SEVERITY_INFO, tinygps.location.lng());
 		}
 	}
