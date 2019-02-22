@@ -28,10 +28,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 #include <math.h>
 
-#define _GPRMCterm   "GPRMC"
 #define _GPGGAterm   "GPGGA"
-#define _GNRMCterm   "GNRMC"
-#define _GNGGAterm   "GNGGA"
+#define _GPVTGterm   "GPVTG"
+#define _PHROTterm   "PHROT"
+#define _PHSPDterm   "PHSPD"
+#define _PHTRHterm   "PHTRH"
+#define _PHTROterm   "PHTRO"
+#define _HEHDTterm   "HEHDT"
+#define _HEROTterm   "HEROT"
+#define _HETHSterm   "HETHS"
 
 TinyGPSPlus::TinyGPSPlus()
   :  parity(0)
@@ -171,16 +176,6 @@ bool TinyGPSPlus::endOfTermHandler()
 
       switch(curSentenceType)
       {
-      case GPS_SENTENCE_GPRMC:
-        date.commit();
-        time.commit();
-        if (sentenceHasFix)
-        {
-           location.commit();
-           speed.commit();
-           course.commit();
-        }
-        break;
       case GPS_SENTENCE_GPGGA:
         time.commit();
         if (sentenceHasFix)
@@ -191,11 +186,47 @@ bool TinyGPSPlus::endOfTermHandler()
         satellites.commit();
         hdop.commit();
         break;
-      }
+      
+      case GPS_SENTENCE_GPVTG:
+    	gpvtg_course.commit();
+    	gpvtg_speed.commit();
+        break;
+    
+	  case GPS_SENTENCE_PHROT:
+		phrot_roll.commit();
+		phrot_pitch.commit();
+		phrot_heading.commit();
+		break;
+  
+      case GPS_SENTENCE_PHSPD:
+    	phspd_surge.commit();
+    	phspd_sway.commit();
+    	phspd_heave.commit();
+	    break;
 
-      // Commit all custom listeners of this sentence type
-      for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0; p = p->next)
-         p->commit();
+	  case GPS_SENTENCE_PHTRH:
+		phtrh_pitch.commit();
+		phtrh_roll.commit();
+		break;
+	  
+	  case GPS_SENTENCE_PHTRO:
+		phtro_pitch.commit();
+		phtro_roll.commit();
+		break;
+	  
+	  case GPS_SENTENCE_HEHDT:
+		hehdt_heading.commit();
+		break;
+	  
+	  case GPS_SENTENCE_HEROT:
+		herot_heading.commit();
+		break;
+	  
+	  case GPS_SENTENCE_HETHS:
+		heths_heading.commit();
+		break;
+	}
+
       return true;
     }
 
@@ -210,55 +241,55 @@ bool TinyGPSPlus::endOfTermHandler()
   // the first term determines the sentence type
   if (curTermNumber == 0)
   {
-    if (!strcmp(term, _GPRMCterm) || !strcmp(term, _GNRMCterm))
-      curSentenceType = GPS_SENTENCE_GPRMC;
-    else if (!strcmp(term, _GPGGAterm) || !strcmp(term, _GNGGAterm))
+    if (!strcmp(term, _GPGGAterm))
       curSentenceType = GPS_SENTENCE_GPGGA;
+    
+    else if (!strcmp(term, _GPVTGterm))
+      curSentenceType = GPS_SENTENCE_GPVTG;
+    
+    else if (!strcmp(term, _PHROTterm))
+      curSentenceType = GPS_SENTENCE_PHROT;
+    
+    else if (!strcmp(term, _PHSPDterm))
+      curSentenceType = GPS_SENTENCE_PHSPD;
+    
+    else if (!strcmp(term, _PHTRHterm))
+      curSentenceType = GPS_SENTENCE_PHTRH;
+    
+    else if (!strcmp(term, _PHTROterm))
+      curSentenceType = GPS_SENTENCE_PHTRO;
+    
+    else if (!strcmp(term, _HEHDTterm))
+      curSentenceType = GPS_SENTENCE_HEHDT;
+    
+    else if (!strcmp(term, _HEROTterm))
+      curSentenceType = GPS_SENTENCE_HEROT;
+    
+    else if (!strcmp(term, _HETHSterm))
+      curSentenceType = GPS_SENTENCE_HETHS;
+    
     else
       curSentenceType = GPS_SENTENCE_OTHER;
-
-    // Any custom candidates of this sentence type?
-    for (customCandidates = customElts; customCandidates != NULL && strcmp(customCandidates->sentenceName, term) < 0; customCandidates = customCandidates->next);
-    if (customCandidates != NULL && strcmp(customCandidates->sentenceName, term) > 0)
-       customCandidates = NULL;
-
     return false;
   }
 
   if (curSentenceType != GPS_SENTENCE_OTHER && term[0])
     switch(COMBINE(curSentenceType, curTermNumber))
   {
-    case COMBINE(GPS_SENTENCE_GPRMC, 1): // Time in both sentences
     case COMBINE(GPS_SENTENCE_GPGGA, 1):
       time.setTime(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 2): // GPRMC validity
-      sentenceHasFix = term[0] == 'A';
-      break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 3): // Latitude
     case COMBINE(GPS_SENTENCE_GPGGA, 2):
       location.setLatitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 4): // N/S
     case COMBINE(GPS_SENTENCE_GPGGA, 3):
       location.rawNewLatData.negative = term[0] == 'S';
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 5): // Longitude
     case COMBINE(GPS_SENTENCE_GPGGA, 4):
       location.setLongitude(term);
       break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 6): // E/W
     case COMBINE(GPS_SENTENCE_GPGGA, 5):
       location.rawNewLngData.negative = term[0] == 'W';
-      break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 7): // Speed (GPRMC)
-      speed.set(term);
-      break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 8): // Course (GPRMC)
-      course.set(term);
-      break;
-    case COMBINE(GPS_SENTENCE_GPRMC, 9): // Date (GPRMC)
-      date.setDate(term);
       break;
     case COMBINE(GPS_SENTENCE_GPGGA, 6): // Fix data (GPGGA)
       sentenceHasFix = term[0] > '0';
@@ -272,61 +303,70 @@ bool TinyGPSPlus::endOfTermHandler()
     case COMBINE(GPS_SENTENCE_GPGGA, 9): // Altitude (GPGGA)
       altitude.set(term);
       break;
+      
+    case COMBINE(GPS_SENTENCE_GPVTG, 3):
+	  gpvtg_course.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_GPVTG, 7):
+	  gpvtg_speed.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHROT, 1):
+	  phrot_roll.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHROT, 2):
+	  phrot_pitch.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHROT, 3):
+	  phrot_heading.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHSPD, 1):
+	  phspd_surge.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHSPD, 2):
+	  phspd_sway.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHSPD, 3):
+	  phspd_heave.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHTRH, 1):
+	  phtrh_pitch.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHTRH, 3):
+	  phtrh_roll.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHTRO, 1):
+	  phtro_pitch.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_PHTRO, 3):
+	  phtro_roll.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_HEHDT, 1):
+	  hehdt_heading.set(term);
+	  break;
+	  
+    case COMBINE(GPS_SENTENCE_HEROT, 1):
+	  herot_heading.set(term);
+	  break;
+    	  
+    case COMBINE(GPS_SENTENCE_HETHS, 1):
+	  heths_heading.set(term);
+	  break;
   }
-
-  // Set custom values as needed
-  for (TinyGPSCustom *p = customCandidates; p != NULL && strcmp(p->sentenceName, customCandidates->sentenceName) == 0 && p->termNumber <= curTermNumber; p = p->next)
-    if (p->termNumber == curTermNumber)
-         p->set(term);
 
   return false;
 }
-
-/* static */
-//double TinyGPSPlus::distanceBetween(double lat1, double long1, double lat2, double long2)
-//{
-//  // returns distance in meters between two positions, both specified
-//  // as signed decimal-degrees latitude and longitude. Uses great-circle
-//  // distance computation for hypothetical sphere of radius 6372795 meters.
-//  // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
-//  // Courtesy of Maarten Lamers
-//  double delta = radians(long1-long2);
-//  double sdlong = sin(delta);
-//  double cdlong = cos(delta);
-//  lat1 = radians(lat1);
-//  lat2 = radians(lat2);
-//  double slat1 = sin(lat1);
-//  double clat1 = cos(lat1);
-//  double slat2 = sin(lat2);
-//  double clat2 = cos(lat2);
-//  delta = (clat1 * slat2) - (slat1 * clat2 * cdlong);
-//  delta = sq(delta);
-//  delta += sq(clat2 * sdlong);
-//  delta = sqrt(delta);
-//  double denom = (slat1 * slat2) + (clat1 * clat2 * cdlong);
-//  delta = atan2(delta, denom);
-//  return delta * 6372795;
-//}
-
-//double TinyGPSPlus::courseTo(double lat1, double long1, double lat2, double long2)
-//{
-//  // returns course in degrees (North=0, West=270) from position 1 to position 2,
-//  // both specified as signed decimal-degrees latitude and longitude.
-//  // Because Earth is no exact sphere, calculated course may be off by a tiny fraction.
-//  // Courtesy of Maarten Lamers
-//  double dlon = radians(long2-long1);
-//  lat1 = radians(lat1);
-//  lat2 = radians(lat2);
-//  double a1 = sin(dlon) * cos(lat2);
-//  double a2 = sin(lat1) * cos(lat2) * cos(dlon);
-//  a2 = cos(lat1) * sin(lat2) - a2;
-//  a2 = atan2(a1, a2);
-//  if (a2 < 0.0)
-//  {
-//    a2 += TWO_PI;
-//  }
-//  return degrees(a2);
-//}
 
 const char *TinyGPSPlus::cardinal(double course)
 {

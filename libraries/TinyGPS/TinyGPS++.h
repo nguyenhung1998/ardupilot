@@ -181,6 +181,81 @@ struct TinyGPSAltitude : TinyGPSDecimal
    double feet()         { return _GPS_FEET_PER_METER * value() / 100.0; }
 };
 
+struct GPVTG_magnetic_course : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct GPVTG_speed : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHROT_roll : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHROT_pitch : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHROT_heading : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHSPD_surge : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHSPD_sway : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHSPD_heave : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHTRH_pitch : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHTRH_roll : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHTRO_pitch : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct PHTRO_roll : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct HEHDT_heading : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct HEROT_heading : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
+struct HETHS_heading : TinyGPSDecimal
+{
+   double real_value()       { return value() / 100.0; }
+};
+
 struct TinyGPSHDOP : TinyGPSDecimal
 {
    double hdop() { return value() / 100.0; }
@@ -228,11 +303,24 @@ public:
   TinyGPSAltitude altitude;
   TinyGPSInteger satellites;
   TinyGPSHDOP hdop;
-
+  GPVTG_magnetic_course gpvtg_course;
+  GPVTG_speed gpvtg_speed;
+  PHROT_roll phrot_roll;
+  PHROT_pitch phrot_pitch;
+  PHROT_heading phrot_heading;
+  PHSPD_surge phspd_surge;
+  PHSPD_sway phspd_sway;
+  PHSPD_heave phspd_heave;
+  PHTRH_pitch phtrh_pitch;
+  PHTRH_roll phtrh_roll;
+  PHTRO_pitch phtro_pitch;
+  PHTRO_roll phtro_roll;
+  HEHDT_heading hehdt_heading;
+  HEROT_heading herot_heading;
+  HETHS_heading heths_heading;
+  
   static const char *libraryVersion() { return _GPS_VERSION; }
-
-  static double distanceBetween(double lat1, double long1, double lat2, double long2);
-  static double courseTo(double lat1, double long1, double lat2, double long2);
+  
   static const char *cardinal(double course);
 
   static int32_t parseDecimal(const char *term);
@@ -244,7 +332,7 @@ public:
   uint32_t passedChecksum()   const { return passedChecksumCount; }
 
 private:
-  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPRMC, GPS_SENTENCE_OTHER};
+  enum {GPS_SENTENCE_GPGGA, GPS_SENTENCE_GPVTG, GPS_SENTENCE_PHROT, GPS_SENTENCE_PHSPD, GPS_SENTENCE_PHTRH, GPS_SENTENCE_PHTRO, GPS_SENTENCE_HEHDT, GPS_SENTENCE_HEROT, GPS_SENTENCE_HETHS, GPS_SENTENCE_OTHER};
 
   // parsing state variables
   uint8_t parity;
