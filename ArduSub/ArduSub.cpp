@@ -140,12 +140,36 @@ void Sub::Read_Data()
 	{
 		if (tinygps.encode((char)hal.uartB->read()))
 		//char inChar = (char)hal.uartB->read();
-		if (tinygps.location.isValid())
+		if (tinygps.location.isUpdated())
 		{
 			new_sensor.Read_GPS_Data(tinygps.location.lat() * 1.0e7f, tinygps.location.lng() * 1.0e7f, tinygps.altitude.meters());
 			//hal.uartA->printf("%4.6f, %4.6f \n" , gps.location.lat(), gps.location.lng());
 			gcs().send_text(MAV_SEVERITY_INFO, "%4.6f, %4.6f, %4.6f \n" , tinygps.location.lat(), tinygps.location.lng(), tinygps.altitude.meters());
 			//gcs().send_text(MAV_SEVERITY_INFO, tinygps.location.lng());
+		}
+		if (tinygps.phrot_roll.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "PHROT: %f \n", tinygps.phrot_roll.real_value());
+		}
+		if (tinygps.phspd_surge.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "PHSPD: %f \n", tinygps.phspd_surge.real_value());
+		}
+		if (tinygps.phtrh_pitch.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "PHTRH: %f \n", tinygps.phtrh_pitch.real_value());
+		}
+		if (tinygps.gpvtg_course.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "PHTRH: %f \n", tinygps.gpvtg_course.real_value());
+		}
+		if (tinygps.phtro_pitch.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "PHTRO_pitch: %f \n", tinygps.phtro_pitch.real_value());
+		}
+		if (tinygps.hehdt_heading.isUpdated())
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "HEHDT: %f \n", tinygps.hehdt_heading.real_value());
 		}
 	}
 
