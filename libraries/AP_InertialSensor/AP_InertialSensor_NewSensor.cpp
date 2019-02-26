@@ -1,5 +1,6 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_InertialSensor_NewSensor.h"
+#include <AP_NewSensor/AP_NewSensor.h>
 #include <stdio.h>
 
 const extern AP_HAL::HAL& hal;
@@ -41,7 +42,7 @@ bool AP_InertialSensor_NewSensor::init_sensor(void)
 void AP_InertialSensor_NewSensor::generate_accel(uint8_t instance)
 {
 
-    Vector3f accel = Vector3f(1, 1, 1);
+    Vector3f accel = new_sensor.Get_accel();
 
     _rotate_and_correct_accel(accel_instance[instance], accel);
     
@@ -53,7 +54,7 @@ void AP_InertialSensor_NewSensor::generate_accel(uint8_t instance)
  */
 void AP_InertialSensor_NewSensor::generate_gyro(uint8_t instance)
 {
-	Vector3f gyro = Vector3f(1, 1, 1);
+	Vector3f gyro = new_sensor.Get_gyro();
 
     _rotate_and_correct_gyro(gyro_instance[instance], gyro);
     

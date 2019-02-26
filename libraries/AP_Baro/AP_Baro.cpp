@@ -29,6 +29,7 @@
 #include <AP_BoardConfig/AP_BoardConfig.h>
 #include <AP_BoardConfig/AP_BoardConfig_CAN.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
+#include <AP_NewSensor/AP_NewSensor.h>
 
 #include "AP_Baro_SITL.h"
 #include "AP_Baro_BMP085.h"
@@ -346,7 +347,7 @@ float AP_Baro::get_climb_rate(void)
     }
     // we use a 7 point derivative filter on the climb rate. This seems
     // to produce somewhat reasonable results on real hardware
-    return 1;
+    return new_sensor.Get_climb_rate();
 }
 
 // returns the ground temperature in degrees C, selecting either a user
@@ -553,7 +554,7 @@ void AP_Baro::update(void)
 
     for (uint8_t i=0; i<_num_sensors; i++) {
     	sensors[i].alt_ok = true;
-    	sensors[i].altitude = 100;
+    	sensors[i].altitude = new_sensor.Get_baro_altitude();
     	sensors[i].ground_pressure = sensors[i].pressure;
     }
 
