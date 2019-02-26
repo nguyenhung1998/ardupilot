@@ -95,9 +95,9 @@ void AP_InertialSensor_Backend::_rotate_and_correct_accel(uint8_t instance, Vect
     accel.rotate(_imu._accel_orientation[instance]);
     
     // apply offsets
-    accel -= _imu._accel_offset[instance];
-
-    // apply scaling
+//    accel -= _imu._accel_offset[instance];
+//
+//    // apply scaling
     const Vector3f &accel_scale = _imu._accel_scale[instance].get();
     accel.x *= accel_scale.x;
     accel.y *= accel_scale.y;
@@ -117,7 +117,7 @@ void AP_InertialSensor_Backend::_rotate_and_correct_gyro(uint8_t instance, Vecto
     gyro.rotate(_imu._gyro_orientation[instance]);
     
     // gyro calibration is always assumed to have been done in sensor frame
-    gyro -= _imu._gyro_offset[instance];
+//    gyro -= _imu._gyro_offset[instance];
 
     if (_imu._board_orientation == ROTATION_CUSTOM && _imu._custom_rotation) {
         gyro = *_imu._custom_rotation * gyro;
