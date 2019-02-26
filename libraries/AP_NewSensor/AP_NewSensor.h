@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <AP_HAL/AP_HAL.h>
+#include <AP_Math/AP_Math.h>
 
 class New_Sensor{
 	public:
@@ -39,6 +40,10 @@ class New_Sensor{
 		void Get_GPS_ground(float &ground_speed, float &ground_course);
 		void Get_GPS_accuracy(float &speed_accuracy, float &horizontal_accuracy, float &vertical_accuracy);
 		void Get_GPS_dilution(uint16_t &hdop, uint16_t &vdop);
+		Vector3f Get_accel();
+		Vector3f Get_gyro();
+		float Get_climb_rate();
+		float Get_baro_altitude();
 		void Read_Data();
 		void Read_GPS_Data(int32_t lat, int32_t lng, int32_t alt);
 
@@ -62,9 +67,13 @@ class New_Sensor{
 		float zbias;								-> sensor[27]
 		*/
 		double sensor[32];
-		int32_t lat;
-		int32_t lng;
-		int32_t alt;
+		int32_t lat = 0;
+		int32_t lng = 0;
+		int32_t alt = 0;
+		Vector3f gyro = Vector3f(0,0,0);
+		Vector3f accel = Vector3f(0,0,0);
+		float climb_rate = 0;
+		float baro_altitude = 0;
 
 };
 

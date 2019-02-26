@@ -222,6 +222,26 @@ void New_Sensor::Get_GPS_dilution(uint16_t &hdop, uint16_t &vdop)
 	vdop = 0;
 }
 
+Vector3f New_Sensor::Get_accel()
+{
+	return this->accel;
+}
+
+Vector3f New_Sensor::Get_gyro()
+{
+	return this->gyro;
+}
+
+float New_Sensor::Get_climb_rate()
+{
+	return this->climb_rate;
+}
+
+float New_Sensor::Get_baro_altitude()
+{
+	return this->baro_altitude;
+}
+
 void New_Sensor::Read_Data()
 {
 	char message[200];
